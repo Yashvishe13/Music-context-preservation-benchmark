@@ -2,3 +2,9 @@ __pycache__/
 *.pyc
 *.wav
 *.ipynb
+__pycache__/
+*.pyc
+*.wav
+*.ipynb
+*.jams
+results/

@@ -107,3 +107,17 @@ def melody_score(audio_ref: str, audio_est: str, use_essentia: bool = False) -> 
     out["contour_dtw"] = contour_dtw_distance(tr, fr, te, fe)
     out["motif_overlap_n3"] = motif_ngram_overlap(tr, fr, te, fe, n=3)
     return out
+
+if __name__ == "__main__":
+    import argparse, json
+    p = argparse.ArgumentParser(description="Melody and Motif Metrics")
+    p.add_argument("--ref", required=True, help="Reference audio file")
+    p.add_argument("--est", required=True, help="Edited audio file")
+    p.add_argument("--use-essentia", action="store_true", help="Use Essentia for F0 extraction")
+    args = p.parse_args()
+    ref_audio = args.ref
+    est_audio = args.est
+    use_essentia = args.use_essentia
+    
+    results = melody_score(ref_audio, est_audio, use_essentia=use_essentia)
+    print(json.dumps(results, indent=2))
