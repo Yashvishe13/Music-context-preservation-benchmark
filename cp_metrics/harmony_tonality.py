@@ -55,7 +55,6 @@ def chord_sequences_madmom(audio_path: str):
                 collections.Mapping = collections.abc.Mapping
                 collections.MutableMapping = collections.abc.MutableMapping
                 collections.Sequence = collections.abc.Sequence
-                print("Applied Python 3.10+ compatibility patch for madmom")
         except Exception as e:
             print(f"Could not apply compatibility patch: {e}")
 
@@ -67,13 +66,10 @@ def chord_sequences_madmom(audio_path: str):
                 np.int = int
                 np.complex = complex
                 np.bool = bool
-                print("Applied NumPy compatibility patch for madmom")
         except Exception as e:
             print(f"Could not apply NumPy compatibility patch: {e}")
 
-        # Now try to import madmom
         from madmom.features.chords import CNNChordFeatureProcessor, CRFChordRecognitionProcessor
-        print("madmom imported successfully")
         
         feats = CNNChordFeatureProcessor()(audio_path)
         crf = CRFChordRecognitionProcessor()

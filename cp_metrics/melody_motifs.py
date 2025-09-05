@@ -1,109 +1,125 @@
-
-from typing import Dict, Any, Tuple
+# melodic_official.py
+from typing import Dict, Tuple, Optional
 import numpy as np
 
-def f0_librosa(audio_path: str, sr: int = 22050, fmin: float = 55.0, fmax: float = 1760.0, hop_length: int = 256):
-    import librosa, numpy as np
+# -----------------------
+# 1) F0 提取（官方实现）
+# -----------------------
+def f0_librosa(audio_path: str,
+               sr: int = 22050,
+               fmin: float = 55.0,
+               fmax: float = 1760.0,
+               hop_length: int = 256) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    import librosa
     y, sr = librosa.load(audio_path, sr=sr, mono=True)
-    f0, vflag, vprob = librosa.pyin(y, fmin=fmin, fmax=fmax, sr=sr, hop_length=hop_length)
-    times = librosa.times_like(f0, sr=sr, hop_length=hop_length)
-    return times, f0, vflag
+    f0, vflag, _vprob = librosa.pyin(y, fmin=fmin, fmax=fmax, sr=sr, hop_length=hop_length)
+    t = librosa.times_like(f0, sr=sr, hop_length=hop_length)
+    v = (vflag.astype(bool)) if vflag is not None else ~np.isnan(f0)
+    return t.astype(float), f0.astype(float), v.astype(bool)
 
-def f0_essentia(audio_path: str, sr: int = 44100):
+def f0_essentia(audio_path: str, sr: int = 44100) -> Tuple[Optional[np.ndarray], Optional[np.ndarray], Optional[np.ndarray]]:
     try:
-        import essentia.standard as ess, numpy as np
-    except Exception as e:
+        import essentia.standard as ess
+    except Exception:
         return None, None, None
     loader = ess.MonoLoader(filename=audio_path, sampleRate=sr)
     y = loader()
-    mel = ess.PredominantPitchMelodia()
+    mel = ess.PredominantPitchMelodia()  # 默认 hopSize=128
     f0, conf = mel(y)
-    times = np.arange(len(f0)) / 44100.0 * 128
-    vflag = f0 > 0
-    f0_hz = np.where(vflag, f0, np.nan)
-    return times, f0_hz, vflag
+    # 更稳：从算法对象读取 hopSize（若不可用则退回 128）
+    hop = mel.paramValue('hopSize') if hasattr(mel, 'paramValue') else 128
+    t = np.arange(len(f0)) * (hop / float(sr))
+    v = (f0 > 0)
+    f0_hz = np.where(v, f0, np.nan)
+    return t.astype(float), f0_hz.astype(float), v.astype(bool)
 
-def mir_melody_scores(t_ref, f0_ref, v_ref, t_est, f0_est, v_est) -> Dict[str, float]:
-    try:
-        import mir_eval, numpy as np
-    except Exception as e:
-        return {"error": f"mir_eval not available: {e}"}
-    fr = np.where(np.isnan(f0_ref), 0.0, f0_ref)
-    fe = np.where(np.isnan(f0_est), 0.0, f0_est)
-    scores = {
-        "overall_accuracy": mir_eval.melody.overall_accuracy(v_ref.astype(bool), fr, v_est.astype(bool), fe),
-        "raw_pitch_accuracy": mir_eval.melody.raw_pitch_accuracy(v_ref.astype(bool), fr, v_est.astype(bool), fe),
-        "raw_chroma_accuracy": mir_eval.melody.raw_chroma_accuracy(v_ref.astype(bool), fr, v_est.astype(bool), fe),
-        "voicing_recall": mir_eval.melody.voicing_recall(v_ref.astype(bool), v_est.astype(bool)),
-        "voicing_false_alarm": mir_eval.melody.voicing_false_alarm(v_ref.astype(bool), v_est.astype(bool)),
-    }
-    return {k: float(v) for k, v in scores.items()}
+# ---------------------------------------
+# 2) 对齐到公共时间网格（实现细节，非指标）
+#    - 仅做线性/最近邻重采样，保证 mir_eval 输入等长
+# ---------------------------------------
+def _resample_to_grid(t: np.ndarray, y: np.ndarray, grid: np.ndarray, kind: str = "linear") -> np.ndarray:
+    # y 可能有 NaN（非发声），线性插值前先把 NaN 暂时当 0 处理
+    y_safe = np.nan_to_num(y, nan=0.0)
+    if kind == "linear":
+        return np.interp(grid, t, y_safe)
+    elif kind == "nearest":
+        # 最近邻（不依赖 scipy）
+        idx = np.clip(np.searchsorted(t, grid), 1, len(t) - 1)
+        left, right = t[idx - 1], t[idx]
+        choose_left = (grid - left) <= (right - grid)
+        out_idx = idx.copy()
+        out_idx[choose_left] = idx[choose_left] - 1
+        return y_safe[out_idx]
+    else:
+        raise ValueError("unsupported kind")
 
-def contour_dtw_distance(t_ref, f0_ref, t_est, f0_est) -> Dict[str, float]:
-    from scipy.interpolate import interp1d
-    import numpy as np
-    if len(t_ref)==0 or len(t_est)==0:
-        return {"pitch_dtw_cosine": 0.0}
-    t0 = max(t_ref[0], t_est[0]); t1 = min(t_ref[-1], t_est[-1])
-    if t1 <= t0 + 1e-6:
-        return {"pitch_dtw_cosine": 0.0}
-    grid = np.linspace(t0, t1, int((t1-t0)*50)+1)
-    def interp(t, f):
-        fz = np.nan_to_num(f, nan=0.0)
-        return interp1d(t, fz, kind="nearest", fill_value="extrapolate")(grid)
-    r = interp(t_ref, f0_ref); e = interp(t_est, f0_est)
-    eps = 1e-8
-    def to_cents(x):
-        return 1200*np.log2(np.maximum(x, eps)/440.0)
-    R = to_cents(r).reshape(-1,1); E = to_cents(e).reshape(-1,1)
-    dR = np.diff(R, axis=0); dE = np.diff(E, axis=0)
-    
-    # Check if we have valid data for DTW
-    if len(dR) == 0 or len(dE) == 0:
-        return {"pitch_dtw_cosine": 0.0}
-    
-    try:
-        from cp_metrics.utils import dtw_cosine
-        sim = dtw_cosine(dR, dE)
-        # Handle NaN results
-        if np.isnan(sim) or np.isinf(sim):
-            return {"pitch_dtw_cosine": 0.0}
-        return {"pitch_dtw_cosine": float(sim)}
-    except Exception as e:
-        return {"pitch_dtw_cosine": 0.0}
+def _align_on_common_grid(t_ref: np.ndarray, f0_ref: np.ndarray, v_ref: np.ndarray,
+                          t_est: np.ndarray, f0_est: np.ndarray, v_est: np.ndarray,
+                          frame_rate: float = 100.0) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    # 取重叠窗
+    t0 = max(float(t_ref[0]), float(t_est[0]))
+    t1 = min(float(t_ref[-1]), float(t_est[-1]))
+    if not (t1 > t0):
+        return np.array([]), np.array([]), np.array([]), np.array([])
 
-def interval_tokens(t, f0) -> list:
-    import numpy as np
-    if len(t) < 2: return []
-    grid = np.linspace(t[0], t[-1], int((t[-1]-t[0])*20)+1)
-    from scipy.interpolate import interp1d
-    f = interp1d(t, np.nan_to_num(f0, nan=0.0), kind="nearest", fill_value="extrapolate")(grid)
-    cents = 1200*np.log2(np.maximum(f, 1e-8)/440.0)
-    steps = np.round(np.diff(cents)/100.0).astype(int)
-    return [int(s) for s in steps]
+    step = 1.0 / frame_rate
+    # 避免末端浮点问题，+1 让右端点能覆盖
+    grid = np.arange(t0, t1 + 1e-9, step, dtype=float)
 
-def motif_ngram_overlap(t_ref, f0_ref, t_est, f0_est, n: int = 3) -> Dict[str, float]:
-    A = interval_tokens(t_ref, f0_ref)
-    B = interval_tokens(t_est, f0_est)
-    def grams(xs):
-        return {tuple(xs[i:i+n]) for i in range(len(xs)-n+1)} if len(xs) >= n else set()
-    GA, GB = grams(A), grams(B)
-    if not GA:
-        return {"jaccard": 0.0, "recall": 0.0}
-    inter = len(GA & GB); uni = len(GA | GB)
-    return {"jaccard": inter/(uni+1e-8), "recall": inter/(len(GA)+1e-8)}
+    # f0 用线性插值；voicing 用最近邻（0/1）
+    fr = _resample_to_grid(t_ref, f0_ref, grid, kind="linear")
+    fe = _resample_to_grid(t_est, f0_est, grid, kind="linear")
+    vr = _resample_to_grid(t_ref, v_ref.astype(float), grid, kind="nearest") >= 0.5
+    ve = _resample_to_grid(t_est, v_est.astype(float), grid, kind="nearest") >= 0.5
 
-def melody_score(audio_ref: str, audio_est: str, use_essentia: bool = False) -> Dict[str, Any]:
-    if use_essentia:
+    # mir_eval 规范：未发声帧 F0 置 0.0
+    fr = np.where(vr, fr, 0.0)
+    fe = np.where(ve, fe, 0.0)
+    return fr.astype(float), vr.astype(bool), fe.astype(float), ve.astype(bool)
+
+# ---------------------------------------
+# 3) 官方指标（仅 mir_eval.melody）
+# ---------------------------------------
+def melody_metrics_official(audio_ref: str,
+                            audio_est: str,
+                            extractor: str = "librosa") -> Dict[str, float]:
+    import mir_eval
+
+    if extractor == "essentia":
         tr, fr, vr = f0_essentia(audio_ref)
         te, fe, ve = f0_essentia(audio_est)
+        if tr is None or te is None:
+            # 回退 librosa
+            tr, fr, vr = f0_librosa(audio_ref)
+            te, fe, ve = f0_librosa(audio_est)
     else:
         tr, fr, vr = f0_librosa(audio_ref)
         te, fe, ve = f0_librosa(audio_est)
-    if tr is None or te is None:
-        return {"error": "F0 extraction failed (try toggling use_essentia)"}
-    out = {}
-    out["mir_melody"] = mir_melody_scores(tr, fr, vr, te, fe, ve)
-    out["contour_dtw"] = contour_dtw_distance(tr, fr, te, fe)
-    out["motif_overlap_n3"] = motif_ngram_overlap(tr, fr, te, fe, n=3)
+
+    if tr is None or te is None or len(tr) == 0 or len(te) == 0:
+        return {"error": "F0 extraction failed"}
+
+    # 对齐到公共网格（保证等长 & 对齐）
+    fr_g, vr_g, fe_g, ve_g = _align_on_common_grid(tr, fr, vr, te, fe, ve, frame_rate=100.0)
+    if fr_g.size == 0:
+        return {"error": "No temporal overlap after alignment"}
+
+    # —— 下面 5 个即 mir_eval 官方旋律指标 —— #
+    out = {
+        "overall_accuracy": float(mir_eval.melody.overall_accuracy(vr_g, fr_g, ve_g, fe_g)),
+        "raw_pitch_accuracy": float(mir_eval.melody.raw_pitch_accuracy(vr_g, fr_g, ve_g, fe_g)),
+        "raw_chroma_accuracy": float(mir_eval.melody.raw_chroma_accuracy(vr_g, fr_g, ve_g, fe_g)),
+        "voicing_recall": float(mir_eval.melody.voicing_recall(vr_g, ve_g)),
+        "voicing_false_alarm": float(mir_eval.melody.voicing_false_alarm(vr_g, ve_g)),
+    }
     return out
+
+if __name__ == "__main__":
+    import argparse, json
+    p = argparse.ArgumentParser()
+    p.add_argument("--ref", required=True)
+    p.add_argument("--est", required=True)
+    p.add_argument("--extractor", choices=["librosa", "essentia"], default="librosa")
+    args = p.parse_args()
+    scores = melody_metrics_official(args.ref, args.est, extractor=args.extractor)
+    print(json.dumps(scores, indent=2, ensure_ascii=False))
