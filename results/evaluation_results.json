@@ -6,84 +6,84 @@
       "strength": 0.8634849190711975
     },
     "key_est": {
-      "key": "A",
+      "key": "G",
       "scale": "major",
-      "strength": 0.8440192341804504
+      "strength": 0.8757074475288391
     },
     "key_relatedness": {
-      "distance_steps": 0,
-      "distance_norm_0to1": 0.0
+      "distance_steps": 2,
+      "distance_norm_0to1": 0.3333333333333333
     },
     "chroma_similarity": {
-      "chroma_dtw_cosine": 0.990125828969925,
-      "mean_chroma_cosine": 0.9959534244192599
+      "chroma_dtw_cosine": 0.7191508727477848,
+      "mean_chroma_cosine": 0.9223694079276712
     },
     "chord_similarity": {
-      "mir_thirds": 0.8352542372881356,
-      "mir_thirds_inv": 0.8352542372881356,
-      "mir_triads": 0.8352542372881356,
-      "mir_triads_inv": 0.8352542372881356,
-      "mir_tetrads": 0.8352542372881356,
-      "mir_tetrads_inv": 0.8352542372881356,
-      "mir_root": 0.8467796610169492,
-      "mir_mirex": 0.8352542372881356,
-      "mir_majmin": 0.8352542372881356,
-      "mir_majmin_inv": 0.8352542372881356,
-      "mir_sevenths": 0.8352542372881356,
-      "mir_sevenths_inv": 0.8352542372881356,
-      "mir_underseg": 0.9186440677966101,
-      "mir_overseg": 0.879322033898305,
-      "mir_seg": 0.879322033898305
+      "mir_thirds": 0.049491525423728755,
+      "mir_thirds_inv": 0.049491525423728755,
+      "mir_triads": 0.049491525423728755,
+      "mir_triads_inv": 0.049491525423728755,
+      "mir_tetrads": 0.049491525423728755,
+      "mir_tetrads_inv": 0.049491525423728755,
+      "mir_root": 0.06644067796610169,
+      "mir_mirex": 0.049491525423728755,
+      "mir_majmin": 0.049491525423728755,
+      "mir_majmin_inv": 0.049491525423728755,
+      "mir_sevenths": 0.049491525423728755,
+      "mir_sevenths_inv": 0.049491525423728755,
+      "mir_underseg": 0.7444067796610172,
+      "mir_overseg": 0.6183050847457626,
+      "mir_seg": 0.6183050847457626
     }
   },
   "rhythm_meter": {
     "tempo_ref_bpm": 78.30255681818181,
-    "tempo_est_bpm": 78.30255681818181,
-    "delta_bpm": 0.0,
+    "tempo_est_bpm": 135.99917763157896,
+    "delta_bpm": 57.696620813397146,
     "beat_mir_eval": {
-      "F-measure": 0.9637883008356547,
-      "Cemgil": 0.9344557149119517,
-      "Cemgil Best Metric Level": 0.9344557149119517,
-      "Goto": 1.0,
-      "P-score": 0.9777777777777777,
-      "Correct Metric Level Continuous": 0.7888888888888889,
-      "Correct Metric Level Total": 0.9666666666666667,
-      "Any Metric Level Continuous": 0.7888888888888889,
-      "Any Metric Level Total": 0.9666666666666667,
-      "Information gain": 0.8047649676290504
+      "F-measure": 0.2803030303030303,
+      "Cemgil": 0.15875306516486468,
+      "Cemgil Best Metric Level": 0.23603970458932066,
+      "Goto": 0.0,
+      "P-score": 0.3735632183908046,
+      "Correct Metric Level Continuous": 0.0,
+      "Correct Metric Level Total": 0.0,
+      "Any Metric Level Continuous": 0.013927576601671309,
+      "Any Metric Level Total": 0.2590529247910863,
+      "Information gain": 0.04021325199401309
     }
   },
   "structural_form": {
-    "boundary_p": 0.5714285714285714,
-    "boundary_r": 0.5714285714285714,
-    "boundary_f": 0.5714285714285714,
+    "boundary_p": 0.2727272727272727,
+    "boundary_r": 0.42857142857142855,
+    "boundary_f": 0.33333333333333326,
     "pairwise_error": "ValueError: Segment intervals do not start at 0",
     "ari_error": "ValueError: Segment intervals do not start at 0",
-    "best_boundary_shift_sec": 0.020000000000001794,
-    "boundary_f_after_shift": 0.5714285714285714,
-    "structural_form_score": 0.39999999999999997
+    "best_boundary_shift_sec": 0.16000000000000192,
+    "boundary_f_after_shift": 0.33333333333333326,
+    "structural_form_score": 0.23333333333333325
   },
   "melodic_content": {
     "mir_melody": {
-      "overall_accuracy": 0.7056692913385827,
-      "raw_pitch_accuracy": 0.7309883848345387,
-      "raw_chroma_accuracy": 0.7309883848345387,
-      "voicing_recall": 0.8462634231865002,
-      "voicing_false_alarm": 0.35898153329602683
+      "overall_accuracy": 0.2929133858267717,
+      "raw_pitch_accuracy": 0.3438527284681131,
+      "raw_chroma_accuracy": 0.34615384615384615,
+      "voicing_recall": 0.8446197676966908,
+      "voicing_false_alarm": 0.8371572467823167
     },
     "contour_dtw": {
       "pitch_dtw_cosine": 0.0
     },
     "motif_overlap_n3": {
-      "jaccard": 0.40775558166383363,
-      "recall": 0.5754560530584502
+      "jaccard": 0.19499478623362884,
+      "recall": 0.3101160862303463
     }
   },
   "non_target_score": {
-    "proxy_lf_excess_rate": 0.0,
-    "proxy_hf_excess_rate": 0.001889763779527559,
-    "proxy_silence_mismatch_rate": 0.00047244094488188977,
-    "proxy_instrument_tag_mismatch_rate": 0.0007874015748031496,
-    "non_target_overall_score_0to1": 0.9992125984251968
+    "proxy_lf_excess_rate": 0.0662992125984252,
+    "proxy_hf_excess_rate": 0.25480314960629924,
+    "proxy_silence_mismatch_rate": 0.01669291338582677,
+    "proxy_instrument_tag_mismatch_rate": 0.11259842519685041,
+    "non_target_overall_score_0to1": 0.8874015748031496
   }
 }

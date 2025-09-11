@@ -24,12 +24,44 @@ def f0_essentia(audio_path: str, sr: int = 44100):
     return times, f0_hz, vflag
 
 def mir_melody_scores(t_ref, f0_ref, v_ref, t_est, f0_est, v_est) -> Dict[str, float]:
+    """Compute mir_eval melody metrics, clipping arrays to the minimum common length.
+
+    mir_eval requires reference and estimated voicing/frequency arrays to have the
+    same length. Here we force-clip both f0 and voicing arrays to the minimum length
+    across ref/est to avoid length mismatch errors.
+    """
     try:
         import mir_eval, numpy as np
     except Exception as e:
         return {"error": f"mir_eval not available: {e}"}
+
+    # Ensure 1D numpy arrays
+    f0_ref = np.asarray(f0_ref).reshape(-1)
+    f0_est = np.asarray(f0_est).reshape(-1)
+    v_ref = np.asarray(v_ref).reshape(-1)
+    v_est = np.asarray(v_est).reshape(-1)
+
+    # Clip to the minimum common length
+    min_len = int(min(len(f0_ref), len(f0_est), len(v_ref), len(v_est)))
+    if min_len <= 0:
+        return {
+            "overall_accuracy": 0.0,
+            "raw_pitch_accuracy": 0.0,
+            "raw_chroma_accuracy": 0.0,
+            "voicing_recall": 0.0,
+            "voicing_false_alarm": 0.0,
+        }
+
+    f0_ref = f0_ref[:min_len]
+    f0_est = f0_est[:min_len]
+    v_ref = v_ref[:min_len]
+    v_est = v_est[:min_len]
+
+    # Replace NaNs in frequency with 0 per mir_eval expectations
     fr = np.where(np.isnan(f0_ref), 0.0, f0_ref)
     fe = np.where(np.isnan(f0_est), 0.0, f0_est)
+
+    # Compute metrics
     scores = {
         "overall_accuracy": mir_eval.melody.overall_accuracy(v_ref.astype(bool), fr, v_est.astype(bool), fe),
         "raw_pitch_accuracy": mir_eval.melody.raw_pitch_accuracy(v_ref.astype(bool), fr, v_est.astype(bool), fe),
