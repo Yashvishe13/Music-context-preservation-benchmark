@@ -1,0 +1,89 @@
+{
+  "harmony_tonality": {
+    "key_ref": {
+      "key": "A",
+      "scale": "major",
+      "strength": 0.8634849190711975
+    },
+    "key_est": {
+      "key": "A",
+      "scale": "major",
+      "strength": 0.8440192341804504
+    },
+    "key_relatedness": {
+      "distance_steps": 0,
+      "distance_norm_0to1": 0.0
+    },
+    "chroma_similarity": {
+      "chroma_dtw_cosine": 0.990125828969925,
+      "mean_chroma_cosine": 0.9959534244192599
+    },
+    "chord_similarity": {
+      "mir_thirds": 0.8352542372881356,
+      "mir_thirds_inv": 0.8352542372881356,
+      "mir_triads": 0.8352542372881356,
+      "mir_triads_inv": 0.8352542372881356,
+      "mir_tetrads": 0.8352542372881356,
+      "mir_tetrads_inv": 0.8352542372881356,
+      "mir_root": 0.8467796610169492,
+      "mir_mirex": 0.8352542372881356,
+      "mir_majmin": 0.8352542372881356,
+      "mir_majmin_inv": 0.8352542372881356,
+      "mir_sevenths": 0.8352542372881356,
+      "mir_sevenths_inv": 0.8352542372881356,
+      "mir_underseg": 0.9186440677966101,
+      "mir_overseg": 0.879322033898305,
+      "mir_seg": 0.879322033898305
+    }
+  },
+  "rhythm_meter": {
+    "tempo_ref_bpm": 78.30255681818181,
+    "tempo_est_bpm": 78.30255681818181,
+    "delta_bpm": 0.0,
+    "beat_mir_eval": {
+      "F-measure": 0.9637883008356547,
+      "Cemgil": 0.9344557149119517,
+      "Cemgil Best Metric Level": 0.9344557149119517,
+      "Goto": 1.0,
+      "P-score": 0.9777777777777777,
+      "Correct Metric Level Continuous": 0.7888888888888889,
+      "Correct Metric Level Total": 0.9666666666666667,
+      "Any Metric Level Continuous": 0.7888888888888889,
+      "Any Metric Level Total": 0.9666666666666667,
+      "Information gain": 0.8047649676290504
+    }
+  },
+  "structural_form": {
+    "boundary_p": 0.5714285714285714,
+    "boundary_r": 0.5714285714285714,
+    "boundary_f": 0.5714285714285714,
+    "pairwise_error": "ValueError: Segment intervals do not start at 0",
+    "ari_error": "ValueError: Segment intervals do not start at 0",
+    "best_boundary_shift_sec": 0.020000000000001794,
+    "boundary_f_after_shift": 0.5714285714285714,
+    "structural_form_score": 0.39999999999999997
+  },
+  "melodic_content": {
+    "mir_melody": {
+      "overall_accuracy": 0.7056692913385827,
+      "raw_pitch_accuracy": 0.7309883848345387,
+      "raw_chroma_accuracy": 0.7309883848345387,
+      "voicing_recall": 0.8462634231865002,
+      "voicing_false_alarm": 0.35898153329602683
+    },
+    "contour_dtw": {
+      "pitch_dtw_cosine": 0.0
+    },
+    "motif_overlap_n3": {
+      "jaccard": 0.40775558166383363,
+      "recall": 0.5754560530584502
+    }
+  },
+  "non_target_score": {
+    "proxy_lf_excess_rate": 0.0,
+    "proxy_hf_excess_rate": 0.001889763779527559,
+    "proxy_silence_mismatch_rate": 0.00047244094488188977,
+    "proxy_instrument_tag_mismatch_rate": 0.0007874015748031496,
+    "non_target_overall_score_0to1": 0.9992125984251968
+  }
+}
