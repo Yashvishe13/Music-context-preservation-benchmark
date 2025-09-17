@@ -1,7 +1,7 @@
 
 # cp_twofile_metrics
 
-Two-audio-file test harness for **context preservation** in music editing tasks (Harmony, Rhythm, Structure, Melody, Non-target proxy).
+Two-audio-file test harness for **music context preservation** in music editing tasks (Harmony, Rhythm, Structure, Melody).
 
 ## Install
 
@@ -35,5 +35,3 @@ python -m cp_metrics.runner --ref ref.wav --est est.wav --skip-structure
 - **Melodic Content / Motifs** (`cp_metrics/melody_motifs.py`)
   - `f0_librosa(path)` / `f0_essentia(path)`,
   - `mir_melody_scores(...)`, `contour_dtw_distance(...)`, `motif_ngram_overlap(...)`.
-- **Non-target Stems** (2-file proxy) (`cp_metrics/non_target_stems.py`)
-  - `proxy_instrument_mismatch(...)` placeholder; add your tagger later.
