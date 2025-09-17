@@ -1,7 +1,7 @@
 # Music-context-preservation-benchmark
 # cp_twofile_metrics
 
-Two-audio-file test harness for **context preservation** in music editing tasks (Harmony, Rhythm, Structure, Melody, Non-target proxy).
+Two-audio-file test harness for **music context preservation** in music editing tasks (Harmony, Rhythm, Structure, Melody).
 
 ## Install
 
