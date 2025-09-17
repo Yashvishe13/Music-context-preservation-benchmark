@@ -1,9 +1,10 @@
 
 import argparse, json
-from cp_metrics.harmony_tonality import harmony_score
-from cp_metrics.rhythm_meter import rhythm_score
-from cp_metrics.structural_form import structural_score
-from cp_metrics.melody_motifs import melody_score
+import numpy as np
+from .harmony_tonality import harmony_score
+from .rhythm_meter import rhythm_score
+from .structural_form import structural_score
+from .melody_motifs import melody_score    
 
 
 def main():
@@ -21,20 +22,6 @@ def main():
     if not args.skip_structure:
         out["structural_form"] = structural_score(args.ref, args.est)
     out["melodic_content"] = melody_score(args.ref, args.est, use_essentia=args.use_essentia)
-    out["non_target_score"] = non_target_extraneous_score(args.ref, args.est)
-
-    # # Load optional stems if provided
-    # ref_stems = est_stems = None
-    # if args.ref_stems and args.est_stems:
-    #     try:
-    #         ref_stems = np.load(args.ref_stems)
-    #         est_stems = np.load(args.est_stems)
-    #     except Exception as e:
-    #         out.setdefault("warnings", []).append(f"Failed to load stems: {e}")
-
-    # out["non_target_stems"] = comprehensive_non_target_score(
-    #     args.ref, args.est, ref_stems=ref_stems, est_stems=est_stems
-    # )
 
     print(json.dumps(out, indent=2))
     # save to file
