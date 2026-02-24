@@ -1,0 +1,17 @@
+[
+  {
+    "id": "test_pair_1",
+    "ref": "data/ref.wav",
+    "est": "data/output.wav"
+  },
+  {
+    "id": "test_pair_2",
+    "ref": "data/ref.wav",
+    "est": "data/output.wav"
+  },
+  {
+    "id": "test_pair_3",
+    "ref": "data/ref.wav",
+    "est": "data/output.wav"
+  }
+]
