@@ -1,0 +1,4 @@
+id,ref,est
+example_pair_1,data/reference_audio/song1.wav,data/edited_audio/song1.wav
+example_pair_2,data/reference_audio/song2.wav,data/edited_audio/song2.wav
+example_pair_3,data/reference_audio/song3.wav,data/edited_audio/song3.wav

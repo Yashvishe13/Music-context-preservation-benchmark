@@ -181,7 +181,7 @@ def harmony_score(audio_ref: str, audio_est: str) -> Dict[str, Any]:
     if "key" in k_ref and "key" in k_est and "error" not in k_ref and "error" not in k_est:
         res["key_relatedness"] = key_relatedness(k_ref["key"], k_ref["scale"], k_est["key"], k_est["scale"])
     res["chroma_similarity"] = chroma_similarity(audio_ref, audio_est)
-    res["chord_similarity"] = chord_similarity_mireval(audio_ref, audio_est)
+    # res["chord_similarity"] = chord_similarity_mireval(audio_ref, audio_est)
     return res
 
 if __name__ == "__main__":
